@@ -1,13 +1,10 @@
 package org.jboss.aerogear.keycloak.metrics;
 
 import jakarta.ws.rs.core.UriInfo;
-import org.jboss.logging.Logger;
 
 import java.util.List;
 
 class ResourceExtractor {
-
-    private final static Logger logger = Logger.getLogger(ResourceExtractor.class);
 
     private static final boolean IS_RESOURCE_SCRAPING_DISABLED = Boolean.getBoolean("RESOURCE_SCRAPING_DISABLED");
     private static final boolean URI_METRICS_ENABLED = Boolean.parseBoolean(System.getenv("URI_METRICS_ENABLED"));
@@ -46,11 +43,9 @@ class ResourceExtractor {
                 if ("resources".equals(matchedURIs.get(matchedURIs.size() - 1))) {
                     return "";
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append(matchedURIs.get(matchedURIs.size() - 1));
-                sb.append(",");
-                sb.append(matchedURIs.get(matchedURIs.size() - 2));
-                return sb.toString();
+                return matchedURIs.get(matchedURIs.size() - 1) +
+                        "," +
+                        matchedURIs.get(matchedURIs.size() - 2);
             }
         }
         return "";
@@ -67,24 +62,23 @@ class ResourceExtractor {
             List<String> matchedURIs = uriInfo.getMatchedURIs();
             StringBuilder sb = new StringBuilder();
 
-            if (URI_METRICS_FILTER != null && URI_METRICS_FILTER.length() != 0) {
+            if (URI_METRICS_FILTER != null && !URI_METRICS_FILTER.isEmpty()) {
                 String[] filter = URI_METRICS_FILTER.split(",");
 
-                for (int i = 0; i < filter.length; i++) {
-                    if (matchedURIs.get(0).contains(filter[i])) {
-
-                        sb = getURIDetailed(sb, matchedURIs);
+                for (String s : filter) {
+                    if (matchedURIs.get(0).contains(s)) {
+                         getURIDetailed(sb, matchedURIs);
                     }
                 }
             } else {
-                sb = getURIDetailed(sb, matchedURIs);
+                getURIDetailed(sb, matchedURIs);
             }
             return sb.toString();
         }
         return "";
     }
 
-    private static StringBuilder getURIDetailed(StringBuilder sb, List<String> matchedURIs) {
+    private static void getURIDetailed(StringBuilder sb, List<String> matchedURIs) {
 
         String uri = matchedURIs.get(0);
 
@@ -105,6 +99,5 @@ class ResourceExtractor {
             }
             sb.append(uri);
         }
-        return sb;
     }
 }

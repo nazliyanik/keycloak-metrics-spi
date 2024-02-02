@@ -1,17 +1,16 @@
 package org.jboss.aerogear.keycloak.metrics;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import org.jboss.logging.Logger;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class MetricsFilter implements ContainerRequestFilter, ContainerResponseFilter {
+public final class MetricsFilter {
     private static final Logger LOG = Logger.getLogger(MetricsFilter.class);
 
     private static final String METRICS_REQUEST_TIMESTAMP = "metrics.requestTimestamp";
@@ -37,17 +36,15 @@ public final class MetricsFilter implements ContainerRequestFilter, ContainerRes
     private MetricsFilter() {
     }
 
-    @Override
     public void filter(ContainerRequestContext req) {
         req.setProperty(METRICS_REQUEST_TIMESTAMP, System.currentTimeMillis());
     }
 
-    @Override
-    public void filter(ContainerRequestContext req, ContainerResponseContext res) {
+    public void filter(UriInfo uriInfo, ContainerRequestContext req, ContainerResponseContext res) {
         int status = res.getStatus();
 
-        String resource = ResourceExtractor.getResource(req.getUriInfo());
-        String uri = ResourceExtractor.getURI(req.getUriInfo());
+        String resource = ResourceExtractor.getResource(uriInfo);
+        String uri = ResourceExtractor.getURI(uriInfo);
 
         if (URI_METRICS_ENABLED) {
             PrometheusExporter.instance().recordResponseTotal(status, req.getMethod(), resource, uri);
