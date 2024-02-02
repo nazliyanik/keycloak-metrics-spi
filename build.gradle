@@ -4,10 +4,6 @@ plugins {
     id "net.nemerosa.versioning" version "3.0.0"
 }
 
-repositories {
-    jcenter()
-}
-
 configurations {
     bundleLib
 }
@@ -17,7 +13,7 @@ version '5.0.1-SNAPSHOT'
 
 apply plugin: 'java'
 
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 repositories {
     mavenCentral()
@@ -38,12 +34,13 @@ dependencies {
     bundleLib group: 'io.prometheus', name: 'simpleclient_pushgateway', version: prometheusVersion
     configurations.implementation.extendsFrom(configurations.bundleLib)
 
-    testImplementation group: 'junit', name: 'junit', version: '4.13'
-    testImplementation group: 'uk.org.webcompere', name: 'system-stubs-junit4', version: '2.0.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.0'
+    testImplementation group: 'uk.org.webcompere', name: 'system-stubs-jupiter', version: '2.0.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.4.0'
-    // required by 'system-stubs-junit4'
-    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
+    testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
+    compileOnly "io.quarkus:quarkus-resteasy-reactive:${quarkusResteasyVersion}"
     compileOnly 'org.apache.tomcat:tomcat-servlet-api:9.0.37'
 
 }
@@ -63,4 +60,16 @@ jar {
             'Version'        : "${gradle.rootProject.version}"
         )
     }
+}
+
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+    // and/or analogously use “withJavadocJar()” to get a “javadocJar” task
+}
+
+
+test {
+    useJUnitPlatform()
 }
